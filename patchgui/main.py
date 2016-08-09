@@ -1,7 +1,18 @@
 
-import sys, os
+import sys, os.path
 # from PySide.QtCore import *
 from PySide.QtGui import *
+
+if 'python.exe' in sys.executable:
+    PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
+else:
+    PATH = os.path.dirname(os.path.realpath(sys.executable))
+
+if hasattr(sys, '_MEIPASS'):
+    RES_PATH = sys._MEIPASS
+else:
+    RES_PATH = PATH
+
 
 def get_ds_src():
     pass
@@ -22,16 +33,19 @@ class Form(QWidget):
     def __init__(self, parent=None):
         super(Form, self).__init__(parent)
         self.setWindowTitle("Phoenix Wright | PT-BR")
-        self.fix_size(400, 200)
+        self.fix_size(390, 355)
         
         app_group = QVBoxLayout()
 
-        patchfile_g = QGroupBox("Arquivo do patch")
+        patchfile_g = QGroupBox()
         layout = QHBoxLayout()
-        edit = QLineEdit()
-        button = QPushButton("Selecionar...")
-        layout.addWidget(edit)
-        layout.addWidget(button)
+        label = QLabel()
+        label.setPixmap(QPixmap(os.path.join(RES_PATH, "please.jpg")))
+        # edit = QLineEdit()
+        # button = QPushButton("Selecionar...")
+        # layout.addWidget(edit)
+        # layout.addWidget(button)
+        layout.addWidget(label)
         patchfile_g.setLayout(layout)
 
         ds_g = QGroupBox("Arquivo DS")
