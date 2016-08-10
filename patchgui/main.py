@@ -79,8 +79,18 @@ class Window(QWidget):
         self.edit.setText(self.nds_file[0])
     
     def apply_patch(self):
-        print(self.edit.text())
-        process_call([XDELTA, '-h'])
+        proc = process_call([XDELTA], creationflags=0x08000000)
+        if proc == 0:
+            msg = QMessageBox(QMessageBox.Information,
+                'Phoenix Wright | PT-BR', 'Patch concluído com sucesso!',
+                buttons=QMessageBox.Ok, parent=self)
+        else:
+            msg = QMessageBox(QMessageBox.Critical,
+                'Phoenix Wright | PT-BR', 'Algum erro ocorreu!',
+                buttons=QMessageBox.Ok, parent=self)
+        space = ' ' * int(len(msg.text())/2)
+        msg.setText(msg.text() + space)
+        ret = msg.exec_()
 
 
 def main():
