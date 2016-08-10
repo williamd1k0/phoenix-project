@@ -1,5 +1,6 @@
 
 import sys, os.path
+import hashlib
 from subprocess import call as process_call
 from PySide.QtGui import *
 
@@ -14,7 +15,11 @@ else:
     RES_PATH = PATH
 
 PATCH_FILE = os.path.join(RES_PATH, 'phoenix.dt')
+NDS_HASH = '6580f4f45f6378a08914a7784f93e7fe'
 XDELTA = os.path.join(RES_PATH, 'xdelta.exe')
+
+def quote(path):
+    return '"{}"'.format(path)
 
 
 class Window(QWidget):
@@ -75,19 +80,39 @@ class Window(QWidget):
             self.patch_button.setEnabled(False)
     
     def get_ds_src(self):
-        self.nds_file = QFileDialog.getOpenFileName(None, "Selecionar ROM", PATH, "Rom (*.*)")
+        self.nds_file = QFileDialog.getOpenFileName(None, "Selecionar ROM", PATH, "Rom (*.nds)")
         self.edit.setText(self.nds_file[0])
     
+
+    def is_us_rom(self, path):
+        hash = None
+        with open(path, 'rb') as nds:
+            hash = hashlib.md5(nds.read())
+        del nds
+        return hash.hexdigest() == NDS_HASH
+
+
     def apply_patch(self):
-        proc = process_call([XDELTA], creationflags=0x08000000)
-        if proc == 0:
-            msg = QMessageBox(QMessageBox.Information,
-                'Phoenix Wright | PT-BR', 'Patch concluído com sucesso!',
+        if not self.is_us_rom(self.edit.text()):
+            msg = QMessageBox(QMessageBox.Critical,
+                'Phoenix Wright | PT-BR', 'Rom incorreta!\nUtilize a rom Americana.',
                 buttons=QMessageBox.Ok, parent=self)
         else:
-            msg = QMessageBox(QMessageBox.Critical,
-                'Phoenix Wright | PT-BR', 'Algum erro ocorreu!',
-                buttons=QMessageBox.Ok, parent=self)
+            filepath = os.path.split(self.edit.text())
+            output = os.path.join(filepath[0], filepath[-1][:-4]+'-PT_BR.nds')
+            proc = process_call('"{}" -d -s "{}" "{}" "{}"'.format(
+                XDELTA, self.edit.text(), PATCH_FILE, output),
+                creationflags=0x08000000)
+
+            if proc == 0:
+                msg = QMessageBox(QMessageBox.Information,
+                    'Phoenix Wright | PT-BR', 'Patch concluído com sucesso!',
+                    buttons=QMessageBox.Ok, parent=self)
+            else:
+                msg = QMessageBox(QMessageBox.Critical,
+                    'Phoenix Wright | PT-BR', 'Algum erro ocorreu!',
+                    buttons=QMessageBox.Ok, parent=self)
+
         space = ' ' * int(len(msg.text())/2)
         msg.setText(msg.text() + space)
         ret = msg.exec_()
