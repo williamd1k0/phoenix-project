@@ -18,9 +18,6 @@ PATCH_FILE = os.path.join(RES_PATH, 'phoenix.dt')
 NDS_HASH = '6580f4f45f6378a08914a7784f93e7fe'
 XDELTA = os.path.join(RES_PATH, 'xdelta.exe')
 
-def quote(path):
-    return '"{}"'.format(path)
-
 
 class Window(QWidget):
  
